@@ -321,6 +321,31 @@ $show_nav = true;
     padding: 20px;
 }
 
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f1f3f4;
+}
+
+.page-title h1 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 2rem;
+}
+
+.page-title p {
+    margin: 0;
+    color: #666;
+    font-size: 1rem;
+}
+
+.page-actions {
+    flex-shrink: 0;
+}
+
 .project-context {
     color: #666;
     font-weight: normal;
@@ -607,6 +632,16 @@ $show_nav = true;
 @media (max-width: 768px) {
     .page-container {
         padding: 15px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .page-actions {
+        align-self: flex-end;
     }
     
     .contact-stats-grid {

@@ -382,20 +382,30 @@ $show_nav = true;
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i>
-                    <?= $is_editing ? 'Update Task' : 'Create Task' ?>
-                </button>
-                <a href="<?= $is_editing ? "task_detail.php?id=$task_id" : ($is_subtask ? "task_detail.php?id=$parent_id" : 'tasks.php') ?>" 
-                   class="btn btn-secondary">
-                    <i class="fas fa-times"></i>
-                    Cancel
-                </a>
-                <?php if ($is_editing && !($task['parent_task_id'] ?? null)): ?>
-                    <a href="task_edit.php?parent_id=<?= $task_id ?>" class="btn btn-outline">
-                        <i class="fas fa-plus"></i>
-                        Add Subtask
+                <div class="form-actions-left">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <?= $is_editing ? 'Update Task' : 'Create Task' ?>
+                    </button>
+                    <a href="<?= $is_editing ? "task_detail.php?id=$task_id" : ($is_subtask ? "task_detail.php?id=$parent_id" : 'tasks.php') ?>" 
+                       class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
                     </a>
+                    <?php if ($is_editing && !($task['parent_task_id'] ?? null)): ?>
+                        <a href="task_edit.php?parent_id=<?= $task_id ?>" class="btn btn-outline">
+                            <i class="fas fa-plus"></i>
+                            Add Subtask
+                        </a>
+                    <?php endif; ?>
+                </div>
+                <?php if ($is_editing): ?>
+                    <div class="form-actions-right">
+                        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                            <i class="fas fa-trash"></i>
+                            Delete Task
+                        </button>
+                    </div>
                 <?php endif; ?>
             </div>
         </form>
@@ -600,9 +610,20 @@ function loadProjectContacts(projectId) {
 
 .form-actions {
     display: flex;
-    gap: 15px;
+    justify-content: space-between;
+    align-items: center;
     padding-top: 20px;
     border-top: 1px solid #f1f3f4;
+}
+
+.form-actions-left {
+    display: flex;
+    gap: 15px;
+}
+
+.form-actions-right {
+    display: flex;
+    gap: 15px;
 }
 
 .form-actions .btn {
@@ -651,6 +672,13 @@ function loadProjectContacts(projectId) {
     
     .form-actions {
         flex-direction: column;
+        gap: 15px;
+    }
+    
+    .form-actions-left,
+    .form-actions-right {
+        flex-direction: column;
+        width: 100%;
     }
     
     .form-actions .btn {
@@ -667,5 +695,15 @@ function loadProjectContacts(projectId) {
     }
 }
 </style>
+
+<?php if ($is_editing): ?>
+<script>
+function confirmDelete() {
+    if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+        window.location.href = 'task_delete.php?id=<?= $task_id ?>';
+    }
+}
+</script>
+<?php endif; ?>
 
 <?php include 'includes/footer.php'; ?>

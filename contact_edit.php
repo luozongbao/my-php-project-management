@@ -335,15 +335,25 @@ $show_nav = true;
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i>
-                    <?= $is_editing ? 'Update Contact' : 'Create Contact' ?>
-                </button>
-                <a href="<?= $is_editing ? "contact_detail.php?id=$contact_id" : 'contacts.php' ?>" 
-                   class="btn btn-secondary">
-                    <i class="fas fa-times"></i>
-                    Cancel
-                </a>
+                <div class="form-actions-left">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <?= $is_editing ? 'Update Contact' : 'Create Contact' ?>
+                    </button>
+                    <a href="<?= $is_editing ? "contact_detail.php?id=$contact_id" : 'contacts.php' ?>" 
+                       class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                </div>
+                <?php if ($is_editing): ?>
+                    <div class="form-actions-right">
+                        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                            <i class="fas fa-trash"></i>
+                            Delete Contact
+                        </button>
+                    </div>
+                <?php endif; ?>
             </div>
         </form>
     </div>
@@ -504,9 +514,20 @@ $show_nav = true;
 
 .form-actions {
     display: flex;
-    gap: 15px;
+    justify-content: space-between;
+    align-items: center;
     padding-top: 20px;
     border-top: 1px solid #f1f3f4;
+}
+
+.form-actions-left {
+    display: flex;
+    gap: 15px;
+}
+
+.form-actions-right {
+    display: flex;
+    gap: 15px;
 }
 
 .form-actions .btn {
@@ -555,6 +576,13 @@ $show_nav = true;
     
     .form-actions {
         flex-direction: column;
+        gap: 15px;
+    }
+    
+    .form-actions-left,
+    .form-actions-right {
+        flex-direction: column;
+        width: 100%;
     }
     
     .form-actions .btn {
@@ -566,5 +594,15 @@ $show_nav = true;
     }
 }
 </style>
+
+<?php if ($is_editing): ?>
+<script>
+function confirmDelete() {
+    if (confirm('Are you sure you want to delete this contact? This action cannot be undone.')) {
+        window.location.href = 'contact_delete.php?id=<?= $contact_id ?>';
+    }
+}
+</script>
+<?php endif; ?>
 
 <?php include 'includes/footer.php'; ?>
