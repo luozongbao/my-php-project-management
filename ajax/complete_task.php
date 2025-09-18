@@ -3,12 +3,66 @@
  * AJAX endpoint for quick task completion
  */
 
-require_once '../config.php';
-require_once '../includes/Database.php';
-require_once '../includes/functions.php';
+require_once dirname(__DIR__) . '/config.php';
+require_once dirname(__DIR__) . '/includes/Database.php';
+require_once dirname(__DIR__) . '/includes/functions.php';
 
 header('Content-Type: application/json');
 requireLogin();
+
+/**
+ * Update parent task completion percentage based on subtasks
+ */
+function updateParentTaskCompletion($db, $parent_task_id) {
+    // Get all subtasks for this parent task
+    $subtasks = $db->fetchAll(
+        "SELECT id, completion_percentage, status FROM tasks WHERE parent_task_id = ?",
+        [$parent_task_id]
+    );
+    
+    if (empty($subtasks)) {
+        return;
+    }
+    
+    // Calculate average completion percentage
+    $total_completion = 0;
+    $completed_count = 0;
+    
+    foreach ($subtasks as $subtask) {
+        $total_completion += $subtask['completion_percentage'];
+        if ($subtask['status'] === 'completed') {
+            $completed_count++;
+        }
+    }
+    
+    $average_completion = round($total_completion / count($subtasks), 1);
+    
+    // Determine parent task status
+    $parent_status = 'not_started';
+    if ($average_completion > 0 && $average_completion < 100) {
+        $parent_status = 'in_progress';
+    } elseif ($average_completion === 100.0) {
+        $parent_status = 'completed';
+    }
+    
+    // Update parent task
+    $update_params = [$parent_status, $average_completion, $parent_task_id];
+    $completion_date_sql = '';
+    
+    if ($parent_status === 'completed') {
+        $completion_date_sql = ', completion_date = NOW()';
+    }
+    
+    $db->execute(
+        "UPDATE tasks SET 
+         status = ?,
+         completion_percentage = ?,
+         updated_at = NOW()
+         {$completion_date_sql}
+         WHERE id = ?",
+        $update_params
+    );
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -59,6 +113,11 @@ try {
          WHERE id = ?",
         [$completion_date, $task_id]
     );
+    
+    // If this is a subtask, update parent task completion percentage
+    if ($task['parent_task_id']) {
+        updateParentTaskCompletion($db, $task['parent_task_id']);
+    }
     
     // Get updated task data
     $updated_task = $db->fetchOne(
