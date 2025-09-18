@@ -115,8 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                 }
                 
-                setFlashMessage('Contact updated successfully!', 'success');
-                redirect("contact_detail.php?id=$contact_id");
+                redirect("contact_detail.php?id=$contact_id", 'Contact updated successfully!', 'success');
             } else {
                 // Create new contact
                 $db->execute(
@@ -140,8 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                 }
                 
-                setFlashMessage('Contact created successfully!', 'success');
-                redirect("contact_detail.php?id=$new_contact_id");
+                redirect("contact_detail.php?id=$new_contact_id", 'Contact created successfully!', 'success');
             }
         } catch (Exception $e) {
             $errors[] = "Error saving contact: " . $e->getMessage();
