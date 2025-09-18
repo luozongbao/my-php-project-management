@@ -236,11 +236,11 @@ $show_nav = true;
                     <span class="count">(<?= count($project_contacts) ?>)</span>
                 </h2>
                 <div class="section-actions">
-                    <a href="project_contact_edit.php?project_id=<?= $project['id'] ?>" class="btn btn-primary btn-sm">
+                    <a href="contact_edit.php?project_id=<?= $project['id'] ?>" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i>
                         Add Contact
                     </a>
-                    <a href="project_contacts.php?project_id=<?= $project['id'] ?>" class="btn btn-secondary btn-sm">
+                    <a href="contacts.php?project_id=<?= $project['id'] ?>" class="btn btn-secondary btn-sm">
                         <i class="fas fa-list"></i>
                         View All
                     </a>

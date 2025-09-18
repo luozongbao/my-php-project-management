@@ -115,7 +115,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                 }
                 
-                redirect("contact_detail.php?id=$contact_id", 'Contact updated successfully!', 'success');
+                // Redirect based on context
+                if ($project_id) {
+                    redirect("project_detail.php?id=$project_id", 'Contact updated successfully!', 'success');
+                } else {
+                    redirect("contact_detail.php?id=$contact_id", 'Contact updated successfully!', 'success');
+                }
             } else {
                 // Create new contact
                 $db->execute(
@@ -139,7 +144,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                 }
                 
-                redirect("contact_detail.php?id=$new_contact_id", 'Contact created successfully!', 'success');
+                // Redirect based on context
+                if ($project_id) {
+                    redirect("project_detail.php?id=$project_id", 'Contact created successfully!', 'success');
+                } else {
+                    redirect("contact_detail.php?id=$new_contact_id", 'Contact created successfully!', 'success');
+                }
             }
         } catch (Exception $e) {
             $errors[] = "Error saving contact: " . $e->getMessage();
@@ -159,7 +169,18 @@ $show_nav = true;
             <div class="breadcrumb">
                 <a href="dashboard.php">Dashboard</a>
                 <span>/</span>
-                <a href="contacts.php">Contacts</a>
+                <?php if ($project_id): ?>
+                    <?php 
+                    $project_name = $db->fetchOne("SELECT name FROM projects WHERE id = ?", [$project_id])['name'];
+                    ?>
+                    <a href="projects.php">Projects</a>
+                    <span>/</span>
+                    <a href="project_detail.php?id=<?= $project_id ?>"><?= e($project_name) ?></a>
+                    <span>/</span>
+                    <a href="contacts.php?project_id=<?= $project_id ?>">Contacts</a>
+                <?php else: ?>
+                    <a href="contacts.php">Contacts</a>
+                <?php endif; ?>
                 <?php if ($is_editing): ?>
                     <span>/</span>
                     <a href="contact_detail.php?id=<?= $contact_id ?>"><?= e($contact['name']) ?></a>
