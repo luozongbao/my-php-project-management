@@ -25,20 +25,27 @@ A comprehensive web-based project management application built with PHP, designe
 - **Responsible Person Assignment** for accountability
 - **Project Statistics** including task counts and completion rates
 
-### ✅ Task Management System
-- **Hierarchical Tasks** with unlimited subtask nesting
-- **Task Assignment** to responsible persons and contact persons
-- **Progress Tracking** with percentage-based completion
+### ✅ Advanced Task Management System
+- **Hierarchical Tasks** with unlimited subtask nesting and parent-child relationships
+- **Task Assignment** to responsible persons and contact persons with notification
+- **Progress Tracking** with real-time percentage-based completion updates
+- **Automatic Progress Calculation** - parent task completion calculated from subtasks
 - **Deadline Management** with expected and actual completion dates
-- **Status Management** for comprehensive task lifecycle tracking
-- **Automatic Completion Calculation** based on subtask progress
+- **Status Management** for comprehensive task lifecycle tracking (Not Started, In Progress, Completed, On Hold)
+- **Task Filtering & Search** - filter by project, status, assignee, and search by keywords
+- **Interactive Task Detail Pages** with subtask management and activity tracking
+- **AJAX Progress Updates** for seamless real-time task progress modification
 
-### 👥 Contact Management
-- **Global Contact Database** shared across all projects
-- **Project-Specific Contacts** with relationship mapping
-- **Multi-Channel Communication** (Email, Phone, WeChat, LINE, Facebook, LinkedIn)
-- **Contact Descriptions** for detailed relationship context
-- **Contact Assignment** to tasks and projects
+### 👥 Comprehensive Contact Management
+- **Global Contact Database** shared across all projects with centralized management
+- **Project-Specific Contacts** with flexible relationship mapping and assignments
+- **Multi-Channel Communication Support** (Email, Phone, Mobile, WeChat, LINE, Facebook, LinkedIn)
+- **Contact Profiles** with company information, position, and detailed descriptions
+- **Contact Statistics** showing project associations and task assignments
+- **Communication Integration** - direct email/phone links and social media profiles
+- **Contact Assignment to Tasks** for stakeholder involvement and communication
+- **Contact Filtering & Search** across all projects with advanced search capabilities
+- **Contact Detail Pages** with relationship history and project associations
 
 ### 🌐 Advanced Features
 - **Timezone Management** with UTC storage and user-local display
@@ -194,19 +201,31 @@ project-management/
 │   ├── functions.php      # Utility functions
 │   ├── header.php         # Page header template
 │   └── footer.php         # Page footer template
+├── ajax/                  # AJAX endpoints for dynamic updates
+│   ├── get_project_contacts.php
+│   ├── update_task_progress.php
+│   └── update_task_status.php
 ├── pages/                 # Additional page components
 ├── vendor/                # Composer dependencies
 ├── composer.json          # Dependency management
 ├── config.template.php    # Configuration template
 ├── install.php           # Installation wizard
 ├── index.php             # Application entry point
-├── login.php             # Authentication pages
+├── login.php             # Authentication system
 ├── register.php
 ├── forgot_password.php
 ├── reset_password.php
 ├── logout.php
-├── dashboard.php         # Main dashboard
-├── projects.php          # Project listing
+├── dashboard.php         # Main dashboard with statistics
+├── projects.php          # Project listing and management
+├── project_detail.php    # Detailed project view
+├── project_edit.php      # Project creation and editing
+├── tasks.php             # Task listing with filters
+├── task_detail.php       # Detailed task view with subtasks
+├── task_edit.php         # Task creation and editing
+├── contacts.php          # Contact listing and management
+├── contact_detail.php    # Detailed contact view
+├── contact_edit.php      # Contact creation and editing
 └── README.md
 ```
 
@@ -226,18 +245,47 @@ The schema includes optimized indexes, foreign key constraints, and database vie
 ## Usage Guide
 
 ### Getting Started
-1. **First Login** - Register your account and verify email
-2. **Create Project** - Set up your first project with details
-3. **Add Contacts** - Import or create project stakeholders
-4. **Create Tasks** - Break down work into manageable tasks
-5. **Track Progress** - Update completion percentages and status
+1. **Account Registration** - Register your account and verify email address
+2. **Project Setup** - Create your first project with scope and timeline
+3. **Contact Management** - Add project stakeholders and team members
+4. **Task Creation** - Break down work into hierarchical tasks and subtasks
+5. **Assignment & Tracking** - Assign tasks to people and track progress in real-time
 
-### Project Management Workflow
-1. **Project Creation** - Define scope, timeline, and responsibilities
-2. **Task Breakdown** - Create hierarchical task structure
-3. **Team Assignment** - Assign tasks to team members and contacts
-4. **Progress Monitoring** - Regular updates and status reviews
-5. **Completion Tracking** - Mark milestones and final delivery
+### Complete Project Management Workflow
+1. **Project Initialization**
+   - Create project with detailed description and timeline
+   - Set responsible person and expected completion date
+   - Define project status and milestones
+
+2. **Contact & Team Setup**
+   - Add contacts for project stakeholders
+   - Assign contacts to relevant projects
+   - Maintain contact information and communication channels
+
+3. **Task Structure Development**
+   - Create main tasks aligned with project goals
+   - Break down complex tasks into manageable subtasks
+   - Set task priorities and dependencies
+
+4. **Assignment & Responsibility**
+   - Assign tasks to responsible team members
+   - Associate contact persons for stakeholder communication
+   - Set expected completion dates for each task
+
+5. **Progress Monitoring & Updates**
+   - Real-time progress tracking with percentage completion
+   - Automatic parent task progress calculation from subtasks
+   - Status updates and milestone tracking
+
+6. **Communication & Collaboration**
+   - Direct communication links (email, phone) with contacts
+   - Task comments and progress notes
+   - Project activity feeds and updates
+
+7. **Completion & Closure**
+   - Mark tasks as completed with actual completion dates
+   - Review project outcomes and completion statistics
+   - Archive completed projects for future reference
 
 ### Best Practices
 - **Regular Updates** - Keep task progress current for accurate reporting
@@ -279,10 +327,14 @@ For technical support or questions:
 ## Version History
 
 ### v1.0.0 (Current)
-- Complete project management system
-- User authentication and security
-- Project, task, and contact management
-- Responsive web interface
-- Email notification system
-- Installation wizard
-- Database optimization with views and indexes
+- **Complete Project Management System** with full lifecycle support
+- **Advanced User Authentication** with email verification and secure password reset
+- **Hierarchical Task Management** with unlimited subtask nesting and automatic progress calculation
+- **Comprehensive Contact Management** with multi-channel communication support
+- **Real-time Progress Tracking** with AJAX updates and interactive interfaces
+- **Responsive Web Interface** optimized for desktop and mobile devices
+- **Email Notification System** with SMTP integration and template support
+- **One-Click Installation Wizard** with automated database setup
+- **Database Optimization** with views, indexes, and query performance tuning
+- **Security Features** including CSRF protection, XSS prevention, and secure session management
+- **Modern PHP Architecture** with object-oriented design and best practices
