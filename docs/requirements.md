@@ -1,4 +1,4 @@
-I want to create my php project management to managemy personal project that include these features
+Php project management to manage my personal project that include these features
 
 ## Technology Stack
 1. Nginx

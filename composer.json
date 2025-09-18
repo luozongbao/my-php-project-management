@@ -1,0 +1,17 @@
+{
+    "name": "luozongbao/php-project-management",
+    "description": "Personal PHP Project Management System",
+    "type": "project",
+    "require": {
+        "php": ">=8.3",
+        "phpmailer/phpmailer": "^6.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "includes/"
+        }
+    },
+    "config": {
+        "vendor-dir": "vendor"
+    }
+}
