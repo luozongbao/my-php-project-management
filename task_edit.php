@@ -270,7 +270,7 @@ $show_nav = true;
                     <?php if (!$is_subtask): ?>
                         <div class="form-group">
                             <label for="project_id" class="required">Project:</label>
-                            <select id="project_id" name="project_id" required onchange="loadProjectContacts(this.value)">
+                            <select id="project_id" name="project_id" required>
                                 <option value="">Select Project</option>
                                 <?php foreach ($user_projects as $project): ?>
                                     <option value="<?= $project['id'] ?>" 
