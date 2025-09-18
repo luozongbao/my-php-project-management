@@ -18,12 +18,16 @@ if ($_POST) {
     $completion_date = $_POST['completion_date'] ?? null;
     $status = $_POST['status'] ?? 'not_started';
     
-    // Convert dates to UTC
-    if ($expected_completion_date) {
+    // Convert dates to UTC and handle empty values
+    if ($expected_completion_date && trim($expected_completion_date) !== '') {
         $expected_completion_date = toUTC($expected_completion_date . ' 00:00:00');
+    } else {
+        $expected_completion_date = null;
     }
-    if ($completion_date) {
+    if ($completion_date && trim($completion_date) !== '') {
         $completion_date = toUTC($completion_date . ' 00:00:00');
+    } else {
+        $completion_date = null;
     }
     
     // Validation
@@ -33,7 +37,7 @@ if ($_POST) {
         try {
             if ($project_id) {
                 // Update existing project
-                $db->query(
+                $db->execute(
                     "UPDATE projects SET name = ?, description = ?, expected_completion_date = ?, 
                      completion_date = ?, status = ?, updated_at = NOW() WHERE id = ? AND responsible_person_id = ?",
                     [$name, $description, $expected_completion_date, $completion_date, $status, $project_id, $user_id]
@@ -41,7 +45,7 @@ if ($_POST) {
                 redirect('project_detail.php?id=' . $project_id, 'Project updated successfully!', 'success');
             } else {
                 // Create new project
-                $db->query(
+                $db->execute(
                     "INSERT INTO projects (name, description, responsible_person_id, expected_completion_date, 
                      completion_date, status, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())",
                     [$name, $description, $user_id, $expected_completion_date, $completion_date, $status]
