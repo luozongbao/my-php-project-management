@@ -83,12 +83,18 @@ try {
     $user_id = getCurrentUserId();
     
     // Verify user has permission to complete this task
+    // RECOMMENDATION: For best performance, ensure indexes exist on (project_id, responsible_person_id) in 'projects' and responsible_person_id in 'tasks'.
     $task = $db->fetchOne(
         "SELECT t.*, p.responsible_person_id as project_owner
          FROM tasks t
          JOIN projects p ON t.project_id = p.id
-         WHERE t.id = ? AND (p.responsible_person_id = ? OR t.responsible_person_id = ?)",
-        [$task_id, $user_id, $user_id]
+         WHERE t.id = ? AND p.responsible_person_id = ?
+         UNION
+         SELECT t.*, p.responsible_person_id as project_owner
+         FROM tasks t
+         JOIN projects p ON t.project_id = p.id
+         WHERE t.id = ? AND t.responsible_person_id = ?",
+        [$task_id, $user_id, $task_id, $user_id]
     );
     
     if (!$task) {
