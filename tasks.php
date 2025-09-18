@@ -167,7 +167,7 @@ $show_nav = true;
                             <select id="project_filter" name="project_id">
                                 <option value="">All Projects</option>
                                 <?php foreach ($user_projects as $project): ?>
-                                    <option value="<?= $project['id'] ?>" <?= $_GET['project_id'] == $project['id'] ? 'selected' : '' ?>>
+                                    <option value="<?= $project['id'] ?>" <?= ($_GET['project_id'] ?? '') == $project['id'] ? 'selected' : '' ?>>
                                         <?= e($project['name']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -249,6 +249,13 @@ $show_nav = true;
                                 <?php endif; ?>
                             </div>
                             <div class="task-actions">
+                                <?php if ($task['status'] !== 'completed'): ?>
+                                    <button class="btn btn-sm btn-success quick-complete-btn" 
+                                            data-task-id="<?= $task['id'] ?>" 
+                                            title="Mark as Completed">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                <?php endif; ?>
                                 <a href="task_edit.php?id=<?= $task['id'] ?>" class="btn btn-sm btn-outline" title="Edit Task">
                                     <i class="fas fa-edit"></i>
                                 </a>
@@ -647,5 +654,94 @@ $show_nav = true;
     }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Quick complete functionality
+    document.querySelectorAll('.quick-complete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-task-id');
+            const taskCard = this.closest('.task-card');
+            
+            if (confirm('Mark this task as completed?')) {
+                // Disable button and show loading
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                fetch('ajax/complete_task.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'task_id=' + encodeURIComponent(taskId)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update task status in the UI
+                        const statusSpan = taskCard.querySelector('.status');
+                        if (statusSpan) {
+                            statusSpan.textContent = 'Completed';
+                            statusSpan.className = 'status status-completed';
+                        }
+                        
+                        // Update progress bar
+                        const progressBar = taskCard.querySelector('.progress');
+                        if (progressBar) {
+                            progressBar.style.width = '100%';
+                        }
+                        
+                        const progressText = taskCard.querySelector('.progress-text');
+                        if (progressText) {
+                            progressText.textContent = '100%';
+                        }
+                        
+                        // Remove the quick complete button
+                        this.remove();
+                        
+                        // Show success message
+                        showMessage('Task marked as completed successfully!', 'success');
+                    } else {
+                        showMessage(data.message || 'Error completing task', 'error');
+                        // Restore button
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-check"></i>';
+                    }
+                })
+                .catch(error => {
+                    showMessage('Error completing task', 'error');
+                    // Restore button
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-check"></i>';
+                });
+            }
+        });
+    });
+    
+    // Simple message display function
+    function showMessage(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 15px;
+            border-radius: 4px;
+            background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
+            color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460'};
+            border: 1px solid ${type === 'success' ? '#c3e6cb' : type === 'error' ? '#f5c6cb' : '#bee5eb'};
+        `;
+        alertDiv.textContent = message;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+});
+</script>
 
 <?php include 'includes/footer.php'; ?>

@@ -92,6 +92,14 @@ $show_nav = true;
             </h1>
         </div>
         <div class="page-actions">
+            <?php if ($task['status'] !== 'completed'): ?>
+                <button class="btn btn-success quick-complete-btn" 
+                        data-task-id="<?= $task_id ?>" 
+                        title="Mark as Completed">
+                    <i class="fas fa-check"></i>
+                    Complete Task
+                </button>
+            <?php endif; ?>
             <a href="task_edit.php?id=<?= $task_id ?>" class="btn btn-primary">
                 <i class="fas fa-edit"></i>
                 Edit Task
@@ -198,6 +206,13 @@ $show_nav = true;
                                             </div>
                                         </div>
                                         <div class="subtask-actions">
+                                            <?php if ($subtask['status'] !== 'completed'): ?>
+                                                <button class="btn btn-sm btn-success quick-complete-btn" 
+                                                        data-task-id="<?= $subtask['id'] ?>" 
+                                                        title="Mark as Completed">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            <?php endif; ?>
                                             <a href="task_edit.php?id=<?= $subtask['id'] ?>" class="btn btn-sm btn-outline">
                                                 <i class="fas fa-edit"></i>
                                             </a>
@@ -701,5 +716,108 @@ $show_nav = true;
     }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Quick complete functionality
+    document.querySelectorAll('.quick-complete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-task-id');
+            const isMainTask = this.closest('.page-actions') !== null;
+            const taskElement = isMainTask ? document : this.closest('.subtask-card');
+            
+            if (confirm('Mark this task as completed?')) {
+                // Disable button and show loading
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                fetch('ajax/complete_task.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'task_id=' + encodeURIComponent(taskId)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (isMainTask) {
+                            // For main task, reload the page to show updated status
+                            showMessage('Task marked as completed successfully!', 'success');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            // For subtasks, update UI in place
+                            const statusSpan = taskElement.querySelector('.status');
+                            if (statusSpan) {
+                                statusSpan.textContent = 'Completed';
+                                statusSpan.className = 'status status-completed';
+                            }
+                            
+                            // Update progress bar
+                            const progressBar = taskElement.querySelector('.progress');
+                            if (progressBar) {
+                                progressBar.style.width = '100%';
+                            }
+                            
+                            const progressText = taskElement.querySelector('.progress-text');
+                            if (progressText) {
+                                progressText.textContent = '100%';
+                            }
+                            
+                            // Remove the quick complete button
+                            this.remove();
+                            
+                            // Show success message
+                            showMessage('Subtask marked as completed successfully!', 'success');
+                            
+                            // Refresh subtask progress on the main page after a delay
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        }
+                    } else {
+                        showMessage(data.message || 'Error completing task', 'error');
+                        // Restore button
+                        this.disabled = false;
+                        this.innerHTML = isMainTask ? '<i class="fas fa-check"></i> Complete Task' : '<i class="fas fa-check"></i>';
+                    }
+                })
+                .catch(error => {
+                    showMessage('Error completing task', 'error');
+                    // Restore button
+                    this.disabled = false;
+                    this.innerHTML = isMainTask ? '<i class="fas fa-check"></i> Complete Task' : '<i class="fas fa-check"></i>';
+                });
+            }
+        });
+    });
+    
+    // Simple message display function
+    function showMessage(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 15px;
+            border-radius: 4px;
+            background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
+            color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460'};
+            border: 1px solid ${type === 'success' ? '#c3e6cb' : type === 'error' ? '#f5c6cb' : '#bee5eb'};
+        `;
+        alertDiv.textContent = message;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+});
+</script>
 
 <?php include 'includes/footer.php'; ?>

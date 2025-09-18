@@ -29,7 +29,7 @@ if ($is_editing) {
     if (!$task) {
         redirect('tasks.php');
     }
-    $project_id = $task['project_id'];
+    $project_id = $task['project_id'] ?? null;
 } elseif ($is_subtask) {
     // Get parent task information
     $parent_task = $db->fetchOne(
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $completion_percentage = floatval($_POST['completion_percentage'] ?? 0);
     $expected_completion_date = $_POST['expected_completion_date'] ?? null;
     $completion_date = $_POST['completion_date'] ?? null;
-    $responsible_person_id = $_POST['responsible_person_id'] ?? null;
+    $responsible_person_id = $_POST['responsible_person_id'] ?? ($task['responsible_person_id'] ?? $user_id);
     $contact_person_id = $_POST['contact_person_id'] ?? null;
     $form_project_id = $_POST['project_id'] ?? $project_id;
     
@@ -83,15 +83,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validation
     if (empty($name)) {
-        $errors[] = "Task name is required.";
+        $errors[] = "Task name is required and cannot be empty.";
+    } elseif (strlen($name) > 255) {
+        $errors[] = "Task name must be 255 characters or less.";
+    }
+    
+    if (!empty($description) && strlen($description) > 2000) {
+        $errors[] = "Task description must be 2000 characters or less.";
     }
     
     if (!$form_project_id && !$is_subtask) {
-        $errors[] = "Project selection is required.";
+        $errors[] = "Project selection is required for main tasks.";
+    }
+    
+    if (empty($responsible_person_id)) {
+        $errors[] = "Responsible person must be assigned to the task.";
+    } else {
+        // Validate that the responsible person exists
+        $person_exists = $db->fetchOne("SELECT id FROM users WHERE id = ?", [$responsible_person_id]);
+        if (!$person_exists) {
+            $errors[] = "Selected responsible person does not exist.";
+        }
+    }
+    
+    if (!empty($contact_person_id)) {
+        // Validate that the contact person exists
+        $contact_exists = $db->fetchOne("SELECT id FROM contacts WHERE id = ?", [$contact_person_id]);
+        if (!$contact_exists) {
+            $errors[] = "Selected contact person does not exist.";
+        }
+    }
+    
+    if (!in_array($status, ['not_started', 'in_progress', 'completed', 'on_hold'])) {
+        $errors[] = "Invalid task status selected.";
     }
     
     if ($completion_percentage < 0 || $completion_percentage > 100) {
         $errors[] = "Completion percentage must be between 0 and 100.";
+    }
+    
+    if (!empty($expected_completion_date)) {
+        $expected_date = DateTime::createFromFormat('Y-m-d', $expected_completion_date);
+        if (!$expected_date) {
+            $errors[] = "Invalid expected completion date format.";
+        }
+    }
+    
+    if (!empty($completion_date)) {
+        $comp_date = DateTime::createFromFormat('Y-m-d\TH:i', $completion_date);
+        if (!$comp_date) {
+            $errors[] = "Invalid completion date format.";
+        }
     }
     
     // If status is completed, ensure completion percentage is 100 and completion date is set
@@ -127,8 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ]
                 );
                 
-                setFlashMessage('Task updated successfully!', 'success');
-                redirect("task_detail.php?id=$task_id");
+                redirect("task_detail.php?id=$task_id", 'Task updated successfully!', 'success');
             } else {
                 // Create new task
                 $final_project_id = $is_subtask ? $parent_task['project_id'] : $form_project_id;
@@ -150,8 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $new_task_id = $db->lastInsertId();
                 
-                setFlashMessage('Task created successfully!', 'success');
-                redirect("task_detail.php?id=$new_task_id");
+                redirect("task_detail.php?id=$new_task_id", 'Task created successfully!', 'success');
             }
         } catch (Exception $e) {
             $errors[] = "Error saving task: " . $e->getMessage();
@@ -330,13 +370,13 @@ $show_nav = true;
                     <div class="form-group">
                         <label for="expected_completion_date">Expected Completion:</label>
                         <input type="date" id="expected_completion_date" name="expected_completion_date" 
-                               value="<?= $_POST['expected_completion_date'] ?? ($task['expected_completion_date'] ? date('Y-m-d', strtotime($task['expected_completion_date'])) : '') ?>">
+                               value="<?= $_POST['expected_completion_date'] ?? (isset($task['expected_completion_date']) && $task['expected_completion_date'] ? date('Y-m-d', strtotime($task['expected_completion_date'])) : '') ?>">
                     </div>
                     
                     <div class="form-group" id="completion_date_group" style="display: none;">
                         <label for="completion_date">Completion Date:</label>
                         <input type="datetime-local" id="completion_date" name="completion_date" 
-                               value="<?= $_POST['completion_date'] ?? ($task['completion_date'] ? date('Y-m-d\TH:i', strtotime($task['completion_date'])) : '') ?>">
+                               value="<?= $_POST['completion_date'] ?? (isset($task['completion_date']) && $task['completion_date'] ? date('Y-m-d\TH:i', strtotime($task['completion_date'])) : '') ?>">
                     </div>
                 </div>
             </div>
@@ -351,7 +391,7 @@ $show_nav = true;
                     <i class="fas fa-times"></i>
                     Cancel
                 </a>
-                <?php if ($is_editing && !$task['parent_task_id']): ?>
+                <?php if ($is_editing && !($task['parent_task_id'] ?? null)): ?>
                     <a href="task_edit.php?parent_id=<?= $task_id ?>" class="btn btn-outline">
                         <i class="fas fa-plus"></i>
                         Add Subtask

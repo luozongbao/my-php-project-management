@@ -161,7 +161,7 @@ $show_nav = true;
                             <select id="project_filter" name="project_id">
                                 <option value="">All Projects</option>
                                 <?php foreach ($user_projects as $project): ?>
-                                    <option value="<?= $project['id'] ?>" <?= $_GET['project_id'] == $project['id'] ? 'selected' : '' ?>>
+                                    <option value="<?= $project['id'] ?>" <?= ($_GET['project_id'] ?? '') == $project['id'] ? 'selected' : '' ?>>
                                         <?= e($project['name']) ?>
                                     </option>
                                 <?php endforeach; ?>
